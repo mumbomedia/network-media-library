@@ -404,6 +404,22 @@ function make_content_images_responsive( $content ) {
 remove_filter( 'the_content', 'wp_make_content_images_responsive' );
 add_filter( 'the_content', __NAMESPACE__ . '\make_content_images_responsive' );
 
+function get_attached_file($file,$attachment_id){
+	switch_to_media_site();
+	$file = get_post_meta( $attachment_id, '_wp_attached_file', true );
+	
+	// If the file is relative, prepend upload dir.
+	if ( $file && 0 !== strpos( $file, '/' ) && ! preg_match( '|^.:\\\|', $file ) ) {
+		$uploads = wp_get_upload_dir();
+		if ( false === $uploads['error'] ) {
+			$file = $uploads['basedir'] . "/$file";
+		}
+	}
+	restore_current_blog();
+	return $file;
+}
+add_filter('get_attached_file',__NAMESPACE__ . '\get_attached_file',10,2);
+
 /**
  * A class which encapsulates the filtering of ACF field values.
  */
